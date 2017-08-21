@@ -34,8 +34,10 @@ var linkMap map[string]link
 func displayMsg(in string) string {
 	switch in {
 	case "":
-		fmt.Println("usage: '$ crawl url-to-crawl'")
-		return "usage: '$ crawl url-to-crawl'"
+		//fmt.Println("usage: '$ crawl url-to-crawl'")
+		//return "usage: '$ main url-to-crawl'"
+		fmt.Println("usage: go run ./main.go url-to-craw")
+		return "usage: go run ./main.go url-to-craw"
 	case "-h":
 		listCommands()
 		// can be expanded
@@ -209,9 +211,13 @@ func main() {
 	m = make(map[string]httpResponse)
 	linkMap = make(map[string]link)
 	fmt.Println()
-	var domain = "http://www.emergeadapt.com" // hard coded due to requirements
+	var domain= "http://www.emergeadapt.com" // hard coded due to requirements
 	flag.Parse()
 	args := flag.Args()
+	if len(args) == 0{
+		displayMsg("")
+		os.Exit(1)
+	}
 	u, err := url.ParseRequestURI(args[0]) // check seed link is valid
 	uri := u.String()
 	fmt.Println("begining crawl at: " + uri)
@@ -222,23 +228,17 @@ func main() {
 	}
 	enqueue(uri, domain)
 	// deferred calls are executed in last-in-first-out order
-	defer writeCSV()
-	for i := 0; i < len(linkMap); i++ {
-		if uri, ok := m[linkMap[i]]; ok {
-			fmt.Println(linkMap[i], " should never see this ... found duplicate: ", uri)
-		} else {
-			enqueue(linkMap[i], domain)
-		}
-	}
+	//defer writeCSV()
+	defer scrapeAll(domain)
 }
 
 func scrapeAll(domain string) {
 	fmt.Println(len(linkMap), " queued links")
-	for i := 0; i < len(linkMap); i++ {
-		if uri, ok := m[linkMap[i]]; ok {
-			fmt.Println(linkMap[i], " should never see this ... found duplicate: ", uri)
+	for _, i := range linkMap {
+		if u, ok := linkMap[i.uri]; ok {
+			fmt.Println(i.uri, " should never see this ... found duplicate: ", u)
 		} else {
-			enqueue(linkMap[i], domain)
+			enqueue(i.uri, domain)
 		}
 	}
 }
@@ -247,7 +247,7 @@ func enqueue(uri string, domain string) {
 	timer := time.NewTimer(time.Second * 3)
 	<-timer.C // wait for 3 seconds
 	// check if uri has already been visited
-	if _, ok := m[uri]; ok {
+	if _, ok := linkMap[uri]; ok {
 		fmt.Println("should never see this ", uri)
 	} else {
 		links := scrapeLinks(uri)

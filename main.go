@@ -73,6 +73,7 @@ func scrapeLinks(uri string) []string {
 	} else {
 		resp, err := http.Get(uri)
 		if err != nil {
+			// need to handle errors here which allow program to complete
 			//logError("Cannot retrieve HTML: ", err)
 			fmt.Println(uri, err)
 			return links
@@ -97,7 +98,6 @@ func scrapeLinks(uri string) []string {
 			}
 		}
 	}
-
 	return links
 }
 
@@ -147,11 +147,13 @@ func storeResponse(uri string, title string, status string) {
 func writeCSV() {
 	var headers = []string{"url", "title", "status code"}
 	var data  []string
+
 	for _, i := range m {
 		data = append(data, i.uri)
 		data = append(data, i.title)
 		data = append(data, i.response)
-		//fmt.Println(i, i.title, i.response)
+		data = append(data, "\n") // added for readability
+
 	}
 	// setup writer
 	csvOut, err := os.Create("http_responses_file.csv")
@@ -160,13 +162,13 @@ func writeCSV() {
 	}
 	w := csv.NewWriter(csvOut)
 	defer csvOut.Close()
-
 	if err = w.Write(headers); err != nil {
 		logError("Cannot write headers", err)
 	}
 	if err = w.Write(data); err != nil {
 		logError("Cannot write data", err)
 	}
+
 	w.Flush()
 }
 
@@ -177,7 +179,7 @@ func storeLinks(uri string) {
 
 }
 
-// remove html tags etc
+// remove html a tags - will fail outside domain
 func cleanLinks(links []string) []string {
 	re := regexp.MustCompile("<a href=\"")
 	reTail := regexp.MustCompile("\"")
@@ -239,10 +241,9 @@ func enqueue(uri string, domain string) {
 	<-timer.C // wait for 3 seconds
 	// check if uri has already been visited
 	if  linkMap[uri] {
-		fmt.Println("should never see this ", uri)
+		//fmt.Println("should never see this ", uri)
 	} else {
 		links := scrapeLinks(uri)
-		fmt.Println("scraping: ", uri)
 		links = checkDomain(links, domain)
 		cleanedLinks := cleanLinks(links)
 		for i := 0; i < len(cleanedLinks); i++ {

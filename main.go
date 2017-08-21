@@ -15,10 +15,7 @@ import (
 	"time"
 )
 
-type link struct {
-	uri     string
-	scraped bool
-}
+
 
 type httpResponse struct {
 	uri, title, response string
@@ -28,7 +25,7 @@ type httpResponse struct {
 var m map[string]httpResponse
 
 // collection of links
-var linkMap map[string]link
+var linkMap map[string] bool
 
 // Display usage, flags and custom errors to stdout
 func displayMsg(in string) string {
@@ -99,7 +96,6 @@ func scrapeLinks(uri string) []string {
 				}
 			}
 		}
-
 	}
 
 	return links
@@ -135,6 +131,7 @@ func walkHTML(n *html.Node) (string, bool) {
 	return "", false
 }
 func storeResponse(uri string, title string, status string) {
+	linkMap[uri] = true
 	if link, ok := m[uri]; ok {
 		fmt.Println("Not adding duplicate: ", link)
 	} else {
@@ -149,12 +146,12 @@ func storeResponse(uri string, title string, status string) {
 
 func writeCSV() {
 	var headers = []string{"url", "title", "status code"}
-	data := []string{}
+	var data  []string
 	for _, i := range m {
-		data[0] = i.uri
-		data[1] = i.title
-		data[2] = i.response
-		fmt.Println(i, i.title, i.response)
+		data = append(data, i.uri)
+		data = append(data, i.title)
+		data = append(data, i.response)
+		//fmt.Println(i, i.title, i.response)
 	}
 	// setup writer
 	csvOut, err := os.Create("http_responses_file.csv")
@@ -173,13 +170,11 @@ func writeCSV() {
 	w.Flush()
 }
 
-// store the links in a set
-func storeLinks(link string) {
-	if uri, ok := linkMap[link]; ok {
-		fmt.Println(uri, " is a duplicate of: ", link)
-	} else {
-		//linkMap[link]
-	}
+// store the links in a map
+func storeLinks(uri string) {
+	linkMap[uri] = false
+
+
 }
 
 // remove html tags etc
@@ -209,7 +204,7 @@ func checkDomain(links []string, domain string) []string {
 
 func main() {
 	m = make(map[string]httpResponse)
-	linkMap = make(map[string]link)
+	linkMap = make(map[string]bool)
 	fmt.Println()
 	var domain= "http://www.emergeadapt.com" // hard coded due to requirements
 	flag.Parse()
@@ -228,18 +223,14 @@ func main() {
 	}
 	enqueue(uri, domain)
 	// deferred calls are executed in last-in-first-out order
-	//defer writeCSV()
+	defer writeCSV()
 	defer scrapeAll(domain)
 }
 
 func scrapeAll(domain string) {
 	fmt.Println(len(linkMap), " queued links")
-	for _, i := range linkMap {
-		if u, ok := linkMap[i.uri]; ok {
-			fmt.Println(i.uri, " should never see this ... found duplicate: ", u)
-		} else {
-			enqueue(i.uri, domain)
-		}
+	for i := range linkMap {
+			enqueue(i, domain)
 	}
 }
 
@@ -247,7 +238,7 @@ func enqueue(uri string, domain string) {
 	timer := time.NewTimer(time.Second * 3)
 	<-timer.C // wait for 3 seconds
 	// check if uri has already been visited
-	if _, ok := linkMap[uri]; ok {
+	if  linkMap[uri] {
 		fmt.Println("should never see this ", uri)
 	} else {
 		links := scrapeLinks(uri)

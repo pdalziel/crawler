@@ -33,22 +33,22 @@ func displayMsg(in string) string {
 	case "":
 		//fmt.Println("usage: '$ crawl url-to-crawl'")
 		//return "usage: '$ main url-to-crawl'"
-		fmt.Println("usage: go run ./main.go url-to-craw")
-		return "usage: go run ./main.go url-to-craw"
+		fmt.Println("usage:$ go run ./main.go url-to-craw")
+		return "usage: $ go run ./main.go url-to-craw"
 	case "-h":
-		listCommands()
+		return listCommands()
 		// can be expanded
 	default:
-		fmt.Println("usage: '$ crawl url-to-crawl'")
+		fmt.Println("usage: $ go run ./main.go url-to-craw")
 	}
-	return "usage: '$ crawl url-to-crawl'"
+	return "usage: $ go run ./main.go url-to-craw"
 }
 
 func listCommands() string {
 	// Can be extended and used to list all available command flags
 	fmt.Println("Available commands")
 	fmt.Println("'-h'  :   List available commands")
-	return "Available commands" + "'-h'  :   List available commands"
+	return "Available commands" +  "'-h'  :   List available commands"
 }
 
 // Error logging

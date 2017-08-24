@@ -2,7 +2,7 @@ package main
 
 import (
 	"testing"
-	"net/http/httptest"
+	//"net/http/httptest"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +20,7 @@ func TestDisplayMsg(t *testing.T) {
 	}{
 		{
 			in:  "",
-			out: "usage: '$ crawl url-to-crawl'",
+			out: "usage: $ go run ./main.go url-to-craw",
 		},
 		{
 			in:  "-h",
@@ -28,12 +28,9 @@ func TestDisplayMsg(t *testing.T) {
 		},
 		{
 			in:  "12",
-			out: "usage: '$ crawl url-to-crawl' ",
+			out: "usage: $ go run ./main.go url-to-craw",
 		},
-		{
-			in:  "http://www.emergeadapt.com/",
-			out: "begining crawl at: http://www.emergeadapt.com/",
-		},
+
 	}
 	for i, test := range commandTests {
 		actual := displayMsg(test.in)
@@ -41,22 +38,60 @@ func TestDisplayMsg(t *testing.T) {
 	}
 }
 
-// Test crawl target URL
-func TestRetrieveHTML(t *testing.T) {
+func TestListCommands(t *testing.T) {
+	actual := listCommands()
+	assert.Equal(t, "Available commands"+"'-h'  :   List available commands", actual)
 
 }
 
-// Test crawl rate limiting
-func TestCrawlRequestDelay(t *testing.T) {
+
+// Test crawl target URL
+func TestGetHtmlTitle(t *testing.T) {
 
 }
 
 // Test link extraction from HTML
-func TestExtractURLs(t *testing.T) {
+func TestScrapeLinks(t *testing.T) {
 
 }
 
 // Test creating the output file
-func TestFileWrite(t *testing.T) {
+func TestWriteCSV(t *testing.T) {
+
+}
+
+func TestRemoveIndex(t *testing.T) {
+
+}
+
+func TestIsTitle(t *testing.T) {
+
+}
+
+func TestWalkHTML(t *testing.T) {
+
+}
+
+func TestStoreResponse(t *testing.T) {
+
+}
+
+func TestStoreLinks(t *testing.T) {
+
+}
+
+func TestCleanLinks(t *testing.T) {
+
+}
+
+func TestCheckDomain(t *testing.T) {
+
+}
+
+func TestScrapeAll(t *testing.T) {
+
+}
+
+func TestEnqueue(t *testing.T) {
 
 }

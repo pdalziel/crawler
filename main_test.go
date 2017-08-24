@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 	//"net/http/httptest"
+	"fmt"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -60,11 +61,6 @@ func TestWriteCSV(t *testing.T) {
 			file: "output.csv",
 			out:  "../output.csv",
 		},
-		{
-			path: ".",
-			file: "out.put.csv",
-			out:  "./out.put.csv",
-		},
 	}
 	for i, test := range filenameTests {
 		actual := writeCSV(test.path, test.file)
@@ -73,7 +69,28 @@ func TestWriteCSV(t *testing.T) {
 
 }
 
+// TODO refactor storeResponse to add map params
 func TestStoreResponse(t *testing.T) {
+	response := httpResponse{"https://www.emergeadapt.com", "Business Process & Case Management Platform in the Cloud- CaseBlocks", "200 OK"}
+	m := map[string]httpResponse{"https://www.emergeadapt.com": response}
+	fmt.Println(m)
+	var storeTests = []struct {
+		uri    string
+		title  string
+		status string
+		out    string
+	}{
+		{
+			uri:    "https://www.emergeadapt.com",
+			title:  "Business Process & Case Management Platform in the Cloud- CaseBlocks",
+			status: "200 OK",
+			out:    "Not adding duplicate: https://www.emergeadapt.com",
+		},
+	}
+	for i, test := range storeTests {
+		actual := storeResponse(test.uri, test.title, test.status)
+		assert.Equal(t, test.out, actual, "Test %d", i)
+	}
 
 }
 
@@ -83,7 +100,11 @@ func TestScrapeLinks(t *testing.T) {
 }
 
 func TestRemoveIndex(t *testing.T) {
-
+	expected := []string{"http://www.emergeadapt.com", "http://www.emergeadapt.com/about"}
+	arr := []string{"http://www.emergeadapt.com", "http://www.emergeadapt.com/login",
+		"http://www.emergeadapt.com/about"}
+	actual := removeIndex(arr, 1)
+	assert.Equal(t, expected, actual, "Test %d")
 }
 
 func TestStoreLinks(t *testing.T) {

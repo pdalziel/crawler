@@ -17,14 +17,15 @@ import (
 	"golang.org/x/net/html"
 )
 
+// a struct to hold the http response from the target webpage
 type httpResponse struct {
 	uri, title, response string
 }
 
-// collection of http responses
+// collection of http response types
 var m map[string]httpResponse
 
-// collection of links
+// collection of links to be scraped
 var linkMap map[string]bool
 
 // Display usage, flags and custom errors to stdout
@@ -44,6 +45,7 @@ func displayMsg(in string) string {
 	return "usage: $ go run ./main.go url-to-crawl"
 }
 
+// display the available commands to stdout
 func listCommands() string {
 	// Can be extended and used to list all available command flags
 	fmt.Println("Available commands")
@@ -59,13 +61,13 @@ func logError(message string, err error) {
 	}
 }
 
-// remove urls
+// helper method to remove a url from array
 func removeIndex(s []string, i int) []string {
 	s[len(s)-1], s[i] = s[i], s[len(s)-1]
 	return s[:len(s)-1]
 }
 
-// retrieve links scraped from html source of the target url
+// retrieve links from html source of the target url
 func scrapeLinks(uri string) []string {
 	links := []string{}
 	if link, ok := m[uri]; ok {
@@ -74,11 +76,11 @@ func scrapeLinks(uri string) []string {
 		resp, err := http.Get(uri)
 		if err != nil {
 			// need to handle errors here which allow program to complete
-			//logError("Cannot retrieve HTML: ", err)
+			// logError("Cannot retrieve HTML: ", err)
 			fmt.Println(uri, err)
 			return links
 		}
-		title, _ := getHtmlTitle(uri)
+		title, _ := getHTMLTitle(uri)
 		// add http response to map
 		storeResponse(uri, title, resp.Status)
 		b := resp.Body
@@ -101,11 +103,12 @@ func scrapeLinks(uri string) []string {
 	return links
 }
 
+// check if html node is a title tag
 func isTitle(n *html.Node) bool {
 	return n.Type == html.ElementNode && n.Data == "title"
 }
 
-func getHtmlTitle(uri string) (string, bool) {
+func getHTMLTitle(uri string) (string, bool) {
 	resp, err := http.Get(uri)
 	if err != nil {
 		logError("Cannot retrieve HTML for title: ", err)
@@ -130,20 +133,23 @@ func walkHTML(n *html.Node) (string, bool) {
 	}
 	return "", false
 }
-func storeResponse(uri string, title string, status string) {
-	linkMap[uri] = true
+
+// add the html response structs to a map if there are not present
+func storeResponse(uri string, title string, status string) string {
+	linkMap[uri] = true // this link has been seen now...
 	if link, ok := m[uri]; ok {
-		fmt.Println("Not adding duplicate: ", link)
+		return "Not adding duplicate: " + link.uri
 	} else {
 		m[uri] = httpResponse{
 			uri,
 			title,
 			status,
 		}
-		fmt.Println("added: ", m[uri])
+		return "added: " + uri
 	}
 }
 
+// write the html responses to a csv file
 func writeCSV(path string, filename string) string {
 	outFile := path + "/" + filename
 	var headers = []string{"url", "title", "status code"}
@@ -177,7 +183,6 @@ func writeCSV(path string, filename string) string {
 // store the links in a map
 func storeLinks(uri string) {
 	linkMap[uri] = false
-
 }
 
 // remove html a tags - will fail outside domain

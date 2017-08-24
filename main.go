@@ -159,7 +159,7 @@ func writeCSV(path string, filename string) string {
 	// setup writer
 	csvOut, err := os.Create(outFile)
 	if err != nil {
-		log.Fatal("Unable to open output")
+		logError("Unable to open output", err)
 	}
 	w := csv.NewWriter(csvOut)
 	defer csvOut.Close()

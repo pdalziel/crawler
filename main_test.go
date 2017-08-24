@@ -56,14 +56,14 @@ func TestWriteCSV(t *testing.T) {
 			out:  "./output.csv",
 		},
 		{
-			path: "home",
+			path: "..",
 			file: "output.csv",
-			out:  "home/output.csv",
+			out:  "../output.csv",
 		},
 		{
-			path: "home/src/github.com",
-			file: "output.csv",
-			out:  "home/src/github.com/output.csv",
+			path: ".",
+			file: "out.put.csv",
+			out:  "./out.put.csv",
 		},
 	}
 	for i, test := range filenameTests {

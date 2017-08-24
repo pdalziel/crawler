@@ -1,11 +1,37 @@
 package main
 
 import (
-	"testing"
-	//"net/http/httptest"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"testing"
+
 )
+
+type htmlStruct struct {
+	Body body `xml:"body"`
+}
+type body struct {
+	Content string `xml:",innerxml"`
+}
+
+const testAnchorsHTML = `
+<html>
+   <body>
+   		<div>
+   			<p id="a" class="t1">
+   				not an anchor!
+   				<br/>
+   				<a class="t3">test anchor</a>
+   			</p>
+   			<p id="b" class="t2">bbb
+   				<a class="t1">another anchor</a>
+   			</p>
+   			<p id="c" class="t3">ccc</p>
+   			<p id="d" class="t4">ddd</p>
+   		</div>
+   	</body>
+ </html>
+ `
 
 // Test CLI commands ("-h", "-url=")
 // -h show the available commands
@@ -94,7 +120,7 @@ func TestStoreResponse(t *testing.T) {
 
 }
 
-// Test link extraction from HTML
+//TODO
 func TestScrapeLinks(t *testing.T) {
 
 }
@@ -107,35 +133,40 @@ func TestRemoveIndex(t *testing.T) {
 	assert.Equal(t, expected, actual, "Test %d")
 }
 
-func TestStoreLinks(t *testing.T) {
-
-}
-
+//TODO
 func TestCleanLinks(t *testing.T) {
 
 }
 
+//TODO
 func TestCheckDomain(t *testing.T) {
 
 }
 
-func TestScrapeAll(t *testing.T) {
-
-}
-
-func TestEnqueue(t *testing.T) {
-
-}
-
+//TODO
 func TestIsTitle(t *testing.T) {
+	b := []byte(`<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Title of the document
+        </title>
+    </head>
+    <body>
+        body content
+        <p>more content</p>
+    </body>
+</html>`)
+	fmt.Println(b)
 
 }
 
-// Test crawl target URL
-func TestGetHtmlTitle(t *testing.T) {
+//TODO
+func TestGetHTMLTitle(t *testing.T) {
 
 }
 
+//TODO
 func TestWalkHTML(t *testing.T) {
 
 }

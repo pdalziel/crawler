@@ -20,7 +20,7 @@ func TestDisplayMsg(t *testing.T) {
 	}{
 		{
 			in:  "",
-			out: "usage: $ go run ./main.go url-to-craw",
+			out: "usage: $ go run ./main.go url-to-crawl",
 		},
 		{
 			in:  "-h",
@@ -28,9 +28,8 @@ func TestDisplayMsg(t *testing.T) {
 		},
 		{
 			in:  "12",
-			out: "usage: $ go run ./main.go url-to-craw",
+			out: "usage: $ go run ./main.go url-to-crawl",
 		},
-
 	}
 	for i, test := range commandTests {
 		actual := displayMsg(test.in)
@@ -44,9 +43,37 @@ func TestListCommands(t *testing.T) {
 
 }
 
+// Test creating the output file
+func TestWriteCSV(t *testing.T) {
+	var filenameTests = []struct {
+		path string
+		file string
+		out  string
+	}{
+		{
+			path: ".",
+			file: "output.csv",
+			out:  "./output.csv",
+		},
+		{
+			path: "home",
+			file: "output.csv",
+			out:  "home/output.csv",
+		},
+		{
+			path: "home/src/github.com",
+			file: "output.csv",
+			out:  "home/src/github.com/output.csv",
+		},
+	}
+	for i, test := range filenameTests {
+		actual := writeCSV(test.path, test.file)
+		assert.Equal(t, test.out, actual, "Test %d", i)
+	}
 
-// Test crawl target URL
-func TestGetHtmlTitle(t *testing.T) {
+}
+
+func TestStoreResponse(t *testing.T) {
 
 }
 
@@ -55,24 +82,7 @@ func TestScrapeLinks(t *testing.T) {
 
 }
 
-// Test creating the output file
-func TestWriteCSV(t *testing.T) {
-
-}
-
 func TestRemoveIndex(t *testing.T) {
-
-}
-
-func TestIsTitle(t *testing.T) {
-
-}
-
-func TestWalkHTML(t *testing.T) {
-
-}
-
-func TestStoreResponse(t *testing.T) {
 
 }
 
@@ -93,5 +103,18 @@ func TestScrapeAll(t *testing.T) {
 }
 
 func TestEnqueue(t *testing.T) {
+
+}
+
+func TestIsTitle(t *testing.T) {
+
+}
+
+// Test crawl target URL
+func TestGetHtmlTitle(t *testing.T) {
+
+}
+
+func TestWalkHTML(t *testing.T) {
 
 }

@@ -4,18 +4,18 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+
 	"github.com/bobesa/go-domain-util/domainutil"
 
-	"golang.org/x/net/html"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"regexp"
 	"time"
+
+	"golang.org/x/net/html"
 )
-
-
 
 type httpResponse struct {
 	uri, title, response string
@@ -25,7 +25,7 @@ type httpResponse struct {
 var m map[string]httpResponse
 
 // collection of links
-var linkMap map[string] bool
+var linkMap map[string]bool
 
 // Display usage, flags and custom errors to stdout
 func displayMsg(in string) string {
@@ -33,22 +33,22 @@ func displayMsg(in string) string {
 	case "":
 		//fmt.Println("usage: '$ crawl url-to-crawl'")
 		//return "usage: '$ main url-to-crawl'"
-		fmt.Println("usage:$ go run ./main.go url-to-craw")
-		return "usage: $ go run ./main.go url-to-craw"
+		fmt.Println("usage:$ go run ./main.go url-to-crawl")
+		return "usage: $ go run ./main.go url-to-crawl"
 	case "-h":
 		return listCommands()
 		// can be expanded
 	default:
-		fmt.Println("usage: $ go run ./main.go url-to-craw")
+		fmt.Println("usage: $ go run ./main.go url-to-crawl")
 	}
-	return "usage: $ go run ./main.go url-to-craw"
+	return "usage: $ go run ./main.go url-to-crawl"
 }
 
 func listCommands() string {
 	// Can be extended and used to list all available command flags
 	fmt.Println("Available commands")
 	fmt.Println("'-h'  :   List available commands")
-	return "Available commands" +  "'-h'  :   List available commands"
+	return "Available commands" + "'-h'  :   List available commands"
 }
 
 // Error logging
@@ -78,7 +78,7 @@ func scrapeLinks(uri string) []string {
 			fmt.Println(uri, err)
 			return links
 		}
-		title, _ := GetHtmlTitle(uri)
+		title, _ := getHtmlTitle(uri)
 		// add http response to map
 		storeResponse(uri, title, resp.Status)
 		b := resp.Body
@@ -105,7 +105,7 @@ func isTitle(n *html.Node) bool {
 	return n.Type == html.ElementNode && n.Data == "title"
 }
 
-func GetHtmlTitle(uri string) (string, bool) {
+func getHtmlTitle(uri string) (string, bool) {
 	resp, err := http.Get(uri)
 	if err != nil {
 		logError("Cannot retrieve HTML for title: ", err)
@@ -144,9 +144,10 @@ func storeResponse(uri string, title string, status string) {
 	}
 }
 
-func writeCSV() {
+func writeCSV(path string, filename string) string {
+	outFile := path + "/" + filename
 	var headers = []string{"url", "title", "status code"}
-	var data  []string
+	var data []string
 
 	for _, i := range m {
 		data = append(data, i.uri)
@@ -156,7 +157,7 @@ func writeCSV() {
 
 	}
 	// setup writer
-	csvOut, err := os.Create("http_responses_file.csv")
+	csvOut, err := os.Create(outFile)
 	if err != nil {
 		log.Fatal("Unable to open output")
 	}
@@ -170,12 +171,12 @@ func writeCSV() {
 	}
 
 	w.Flush()
+	return outFile
 }
 
 // store the links in a map
 func storeLinks(uri string) {
 	linkMap[uri] = false
-
 
 }
 
@@ -205,13 +206,15 @@ func checkDomain(links []string, domain string) []string {
 }
 
 func main() {
+	//setFilename("output.csv")
+	//setPath(".")
 	m = make(map[string]httpResponse)
 	linkMap = make(map[string]bool)
 	fmt.Println()
-	var domain= "http://www.emergeadapt.com" // hard coded due to requirements
+	var domain = "http://www.emergeadapt.com" // hard coded due to requirements
 	flag.Parse()
 	args := flag.Args()
-	if len(args) == 0{
+	if len(args) == 0 {
 		displayMsg("")
 		os.Exit(1)
 	}
@@ -225,14 +228,14 @@ func main() {
 	}
 	enqueue(uri, domain)
 	// deferred calls are executed in last-in-first-out order
-	defer writeCSV()
+	defer writeCSV(".", "output.csv")
 	defer scrapeAll(domain)
 }
 
 func scrapeAll(domain string) {
 	fmt.Println(len(linkMap), " queued links")
 	for i := range linkMap {
-			enqueue(i, domain)
+		enqueue(i, domain)
 	}
 }
 
@@ -240,7 +243,7 @@ func enqueue(uri string, domain string) {
 	timer := time.NewTimer(time.Second * 3)
 	<-timer.C // wait for 3 seconds
 	// check if uri has already been visited
-	if  linkMap[uri] {
+	if linkMap[uri] {
 		//fmt.Println("should never see this ", uri)
 	} else {
 		links := scrapeLinks(uri)
